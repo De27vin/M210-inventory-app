@@ -1,4 +1,4 @@
-# ZLI-Modul-109-inventory-app (Lösung)
+# ZLI-Modul-109-inventory-app
 
 ## Technologies
 
