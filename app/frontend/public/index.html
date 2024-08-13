@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Loads the environment variables from the configuration server.
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const config = await response.json();
+
+                // Set global variables on the window object
+                window.BACKEND_PROTOCOL = config.BACKEND_PROTOCOL;
+                window.BACKEND_HOST = config.BACKEND_HOST;
+                window.BACKEND_PORT = config.BACKEND_PORT;
+
+                // Initialize the app after loading the configuration
+                initApp();
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+            }
+        }
+
+        // Initializes the application.
+        function initApp() {
+            import('./js/config.js').then(module => {
+                // Set functions and variables
+                window.handleEnterKey = module.handleEnterKey;
+                window.login = module.login;
+                window.logoff = module.logoff;
+                window.fetchInventoryData = module.fetchInventoryData;
+                window.filterTable = module.filterTable;
+                window.exportToExcel = module.exportToExcel;
+
+                // Check login status when the page loads
+                checkLoginStatus();
+            }).catch(err => console.error('Error initializing app:', err));
+        }
+
+        // Checks the login status.
+        function checkLoginStatus() {
+            const token = localStorage.getItem('access_token');
+            const expiration = localStorage.getItem('token_expiration');
+
+            if (token && expiration) {
+                const expirationTime = parseInt(expiration, 10);
+                if (Date.now() < expirationTime) {
+                    // Token is still valid, show the dashboard
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('inventoryDashboard').style.display = 'block';
+                    fetchInventoryData();
+                } else {
+                    console.log('Token abgelaufen.');
+                    logoff();
+                }
+            } else {
+                // No token present or token expired
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('inventoryDashboard').style.display = 'none';
+            }
+        }
+
+        // Load the configuration when the page loads
+        window.onload = loadConfig;
+    </script>
+</head>
+<body>
+    <div id="loginForm">
+        <h1>Login</h1>
+        <label for="username">Username:</label>
+        <input type="text" id="username" onkeydown="handleEnterKey(event)">
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" onkeydown="handleEnterKey(event)">
+
+        <button onclick="login()">Login</button>
+        <p id="loginError" style="color: red; display: none;">Invalid credentials</p>
+    </div>
+
+    <div id="inventoryDashboard" style="display: none;">
+        <h1>Inventory List</h1>
+        <button onclick="logoff()">Logoff</button>
+        <div>
+            <label for="servernameFilter">Servername:</label>
+            <input type="text" id="servernameFilter" oninput="filterTable()">
+
+            <label for="osFilter">OS:</label>
+            <input type="text" id="osFilter" oninput="filterTable()">
+
+            <label for="appIdFilter">Application ID:</label>
+            <input type="text" id="appIdFilter" oninput="filterTable()">
+
+            <label for="envFilter">Environment:</label>
+            <input type="text" id="envFilter" oninput="filterTable()">
+
+            <button onclick="exportToExcel()">Export to Excel</button>
+            <a href="api_docs.html" target="_blank">API Documentation</a>
+        </div>
+
+        <table id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Servername</th>
+                    <th>OS</th>
+                    <th>Environment</th>
+                    <th>Application ID</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody">
+                <!-- Table content will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="js/xlsx.full.min.js"></script>
+</body>
+</html>

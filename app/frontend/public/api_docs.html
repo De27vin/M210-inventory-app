@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>API Documentation</h1>
+
+    <h2>POST /login</h2>
+    <p>Authenticates a user and returns an access token.</p>
+    <pre>
+    Request:
+    POST /login
+    {
+        "username": "your_username",
+        "password": "your_password"
+    }
+
+    Return:
+    {
+        "access_token": "your_access_token"
+    }
+
+    Example:
+    curl -X POST \
+      http://localhost:5001/login \
+      -H 'Content-Type: application/json' \
+      -d '{
+        "username": "admin",
+        "password": "admin"
+    }'
+    </pre>
+
+    <h2>GET /inventory</h2>
+    <p>Returns a list of all inventory items.</p>
+    <pre>
+    Request:
+    GET /inventory
+
+    Headers:
+    Authorization: Bearer your_access_token
+
+    Return:
+    
+    {
+        "id": 1,
+        "servername": "lnx1000.prod.test.ch",
+        "os": "RHEL 9.1",
+        "environment": "PROD",
+        "application_id": 1001
+    }
+        
+    
+
+    Example:
+    curl -X GET \
+      http://localhost:5001/inventory \
+      -H 'Authorization: Bearer your_access_token'
+    </pre>
+
+    <h2>GET /inventory/&lt;id&gt;</h2>
+    <p>Returns the details of a specific inventory item by ID.</p>
+    <pre>
+    Request:
+    GET /inventory/1
+
+    Headers:
+    Authorization: Bearer your_access_token
+
+    Return:
+    {
+        "id": 1,
+        "servername": "lnx1000.prod.test.ch",
+        "ip": "192.168.40.1",
+        "netmask": "255.255.255.240",
+        "netzzone": "ZIIp",
+        "environment": "PROD",
+        "os": "RHEL 9.1",
+        "kernel_version": "2.6.32-754.50.1.el9.x86_64",
+        "application_id": 1001,
+        "av": "Hans Muster",
+        "bv": "Max Muster",
+        "virtualisierung": "n/a",
+        "hardware": "ProLiant_BL465c_Gen8",
+        "firmware": "A26:03/07/2016",
+        "cpu": 16,
+        "memory": "32189 MB",
+        "cmdb_status": "Deployed",
+        "uptime": "68 days",
+        "lastupdate": "2024-07-04 16:21:01"
+    }
+
+    Example:
+    curl -X GET \
+      http://localhost:5001/inventory/1 \
+      -H 'Authorization: Bearer your_access_token'
+    </pre>
+
+    <h2>POST /inventory</h2>
+    <p>Adds a new inventory item.</p>
+    <pre>
+    Request:
+    POST /inventory
+    {
+        "servername": "lnx1001.prod.test.ch",
+        "ip": "192.168.40.2",
+        "netmask": "255.255.255.240",
+        "netzzone": "ZIIp",
+        "environment": "PROD",
+        "os": "RHEL 9.2",
+        "kernel_version": "2.6.32-754.50.1.el9.x86_64",
+        "application_id": 1002,
+        "av": "John Doe",
+        "bv": "Jane Doe",
+        "virtualisierung": "n/a",
+        "hardware": "ProLiant_BL465c_Gen9",
+        "firmware": "A27:03/08/2017",
+        "cpu": 16,
+        "memory": "32768 MB",
+        "cmdb_status": "Deployed",
+        "uptime": "70 days",
+        "lastupdate": "2024-07-04 16:21:01"
+    }
+
+    Headers:
+    Authorization: Bearer your_access_token
+
+    Return:
+    {
+        "id":2,"message":"Inventory added successfully"
+    }
+
+    Example:
+    curl -X POST \
+      http://localhost:5001/inventory \
+      -H 'Content-Type: application/json' \
+      -H 'Authorization: Bearer your_access_token' \
+      -d '{
+        "servername": "lnx1001.prod.test.ch",
+        "ip": "192.168.40.2",
+        "netmask": "255.255.255.240",
+        "netzzone": "ZIIp",
+        "environment": "PROD",
+        "os": "RHEL 9.2",
+        "kernel_version": "2.6.32-754.50.1.el9.x86_64",
+        "application_id": 1002,
+        "av": "John Doe",
+        "bv": "Jane Doe",
+        "virtualisierung": "n/a",
+        "hardware": "ProLiant_BL465c_Gen9",
+        "firmware": "A27:03/08/2017",
+        "cpu": 16,
+        "memory": "32768 MB",
+        "cmdb_status": "Deployed",
+        "uptime": "70 days",
+        "lastupdate": "2024-07-04 16:21:01"
+    }'
+    </pre>
+
+    <h2>PATCH /inventory/modify/&lt;id&gt;</h2>
+    <p>Modifies an existing inventory item by ID. Only the provided fields will be updated.</p>
+    <pre>
+    Request:
+    PATCH /inventory/modify/1
+    {
+        "os": "RHEL 8.2",
+        "memory": "16384 MB"
+    }
+
+    Headers:
+    Authorization: Bearer your_access_token
+
+    Return:
+    {
+        "message":"Inventory entry 1 updated successfully"
+    }
+
+    Example:
+    curl -X PATCH \
+      http://localhost:5001/inventory/modify/1 \
+      -H 'Content-Type: application/json' \
+      -H 'Authorization: Bearer your_access_token' \
+      -d '{
+        "os": "RHEL 8.2",
+        "memory": "16384 MB"
+    }'
+    </pre>
+
+    <h2>DELETE /inventory/delete/&lt;id&gt;</h2>
+    <p>Deletes an inventory item by ID.</p>
+    <pre>
+    Request:
+    DELETE /inventory/delete/1
+
+    Headers:
+    Authorization: Bearer your_access_token
+
+    Return:
+    {
+        "message":"Inventory entry 1 deleted successfully"
+    }
+
+    Example:
+    curl -X DELETE \
+      http://localhost:5001/inventory/delete/1 \
+      -H 'Authorization: Bearer your_access_token'
+    </pre>
+</body>
+</html>

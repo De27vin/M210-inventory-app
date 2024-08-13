@@ -1,0 +1,32 @@
+# .gitignore file
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Node.js specific files
+node_modules/
+npm-debug.log*
+
+# Ignore built assets
+build
+.cache
+newrelic_agent.log
+
+# Ignore IDE settings
+.idea
+
+# Ignore Visual Studio Code settings
+.vscode
+
+# Ignore code coverage folder
+coverage

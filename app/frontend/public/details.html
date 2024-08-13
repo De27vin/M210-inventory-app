@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Server Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Loads the configuration from the server.
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const config = await response.json();
+                
+                window.BACKEND_PROTOCOL = config.BACKEND_PROTOCOL;
+                window.BACKEND_HOST = config.BACKEND_HOST;
+                window.BACKEND_PORT = config.BACKEND_PORT;
+
+                // Initialize the page after loading the configuration
+                initPage();
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+            }
+        }
+
+        // Initializes the page.
+        function initPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const serverId = urlParams.get('id');
+
+            const token = localStorage.getItem('access_token');
+
+            if (!serverId) {
+                console.error('Server ID not found in URL parameters');
+            } else if (!token) {
+                console.error('Access token not found');
+                const errorRow = document.createElement('tr');
+                errorRow.innerHTML = `
+                    <td colspan="2" style="color: red;">Access token not found. Please log in first.</td>
+                `;
+                document.getElementById('detailsBody').appendChild(errorRow);
+            } else {
+                fetch(`${window.BACKEND_PROTOCOL}://${window.BACKEND_HOST}:${window.BACKEND_PORT}/inventory/${serverId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const detailsTable = document.getElementById('detailsBody');
+                    for (const key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${key}</td>
+                                <td>${data[key]}</td>
+                            `;
+                            detailsTable.appendChild(row);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching server details:', error);
+                    const errorRow = document.createElement('tr');
+                    errorRow.innerHTML = `
+                        <td colspan="2" style="color: red;">Error fetching server details. Please check the console for more information.</td>
+                    `;
+                    document.getElementById('detailsBody').appendChild(errorRow);
+                });
+            }
+        }
+
+        // Load the configuration when the page loads
+        window.onload = loadConfig;
+    </script>
+</head>
+<body>
+    <h1>Server Details</h1>
+    <table id="detailsTable">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody id="detailsBody">
+            <!-- Table content will be added dynamically -->
+        </tbody>
+    </table>
+</body>
+</html>

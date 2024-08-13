@@ -1,0 +1,24 @@
+# Dockerfile for Frontend Service
+# This Dockerfile sets up the environment for running a Node.js frontend application.
+
+# Use the official Node.js image based on Alpine Linux for a small image size
+FROM node:alpine
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Copy package.json and package-lock.json (if available) to the container and install dependencies
+COPY app/frontend/package*.json ./
+RUN npm install
+
+# Copy the rest of the frontend application files to the container
+COPY app/frontend/ .
+
+# Set environment variables for the Node.js server
+ENV PORT=3000
+
+# Expose port 3000 to allow traffic to the Node.js server
+EXPOSE 3000
+
+# Start the Node.js server when the container starts
+CMD ["node", "index.js"]

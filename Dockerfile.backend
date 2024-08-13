@@ -1,0 +1,33 @@
+# Dockerfile for Backend Service
+# This Dockerfile sets up the environment for running a Flask backend application.
+
+# Use the official Python image with version 3.8
+FROM python:3.8-slim
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \                        
+    python3-dev \                
+    libldap2-dev \               
+    libsasl2-dev \               
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements.txt to the container and install Python dependencies
+COPY app/backend/requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the backend application code to the container
+COPY app/backend/ /app
+
+# Set environment variables for Flask
+ENV FLASK_APP=app.py          
+ENV FLASK_RUN_PORT=5001       
+
+# Expose port 5001 to allow traffic to the Flask application
+EXPOSE 5001
+
+# Start the Flask application when the container starts
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]

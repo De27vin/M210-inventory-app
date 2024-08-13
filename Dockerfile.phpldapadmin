@@ -1,0 +1,55 @@
+# Dockerfile for phpLDAPadmin
+# This Dockerfile sets up a container to run phpLDAPadmin with Apache and PHP.
+
+# Use a lightweight base image with PHP and Apache
+FROM php:8.0-apache
+
+# Create a non-root user
+RUN useradd -m openldap
+
+# Switch to the root user to perform system modifications
+USER root
+
+# Install system dependencies and PHP extensions
+RUN apt-get update && \
+    apt-get install -y \
+    wget \
+    libldap2-dev \
+    gettext \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP LDAP and GETTEXT extensions
+RUN docker-php-ext-install ldap gettext
+
+# Download and install phpLDAPadmin
+RUN wget -O /tmp/phpLDAPadmin-1.2.6.7.tar.gz https://github.com/leenooks/phpLDAPadmin/archive/refs/tags/1.2.6.7.tar.gz && \
+    tar -xzf /tmp/phpLDAPadmin-1.2.6.7.tar.gz -C /var/www/html/ && \
+    mv /var/www/html/phpLDAPadmin-* /var/www/html/phpldapadmin && \
+    rm /tmp/phpLDAPadmin-1.2.6.7.tar.gz
+
+# Copy the phpLDAPadmin configuration file
+COPY app/phpldapadmin/config.php /var/www/html/phpldapadmin/config/config.php
+
+# Copy the customized ports.conf file for Apache
+COPY app/phpldapadmin/ports.conf /etc/apache2/ports.conf
+
+# Copy the customized Apache configuration file
+COPY app/phpldapadmin/apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# Set ownership of phpLDAPadmin directory to the non-root user
+RUN chown -R openldap:openldap /var/www/html/phpldapadmin
+
+# Create a configuration file for the global ServerName
+RUN echo "ServerName 127.0.0.1" > /etc/apache2/conf-available/servername.conf
+
+# Enable the new configuration
+RUN a2enconf servername
+
+# Expose port 8080 for the Apache web server
+EXPOSE 8080
+
+# Switch to the non-root user
+USER openldap
+
+# Start Apache in the foreground
+CMD ["apache2-foreground"]

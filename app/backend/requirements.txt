@@ -1,0 +1,6 @@
+Flask
+psycopg2-binary
+Flask-CORS
+python-ldap
+pyjwt
+flask-jwt-extended
