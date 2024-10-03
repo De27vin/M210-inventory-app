@@ -7,9 +7,11 @@ services:
       - 8080:8080
     environment:
       - POSTGRES_HOST=db
-      - POSTGRES_DB=postgredb
+      - POSTGRES_DB=postgresdb
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
+    depends_on:
+      - db
 
   frontend:
     build:
@@ -21,3 +23,16 @@ services:
       - BACKEND_PROTOCOL=http
       - BACKEND_HOST=localhost
       - BACKEND_PORT=8080
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgresdb
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./app/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+volumes:
+  db_data:
